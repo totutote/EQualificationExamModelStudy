@@ -70,7 +70,7 @@ def train_rcnn(model, dataloader_train, dataloader_val, optimizer, criterion, nu
 
 # Pascal VOCデータセットの読み込み
 transform = Compose([Resize((224, 224)), ToTensor()])
-voc_dataset = VOCDetection(root='dataset/', year='2012', image_set='train', download=False, transform=transform)
+voc_dataset = VOCDetection(root='dataset/', year='2012', image_set='train', download=True, transform=transform)
 
 # データセットをトレーニングと検証に分割
 train_size = int(0.8 * len(voc_dataset))
