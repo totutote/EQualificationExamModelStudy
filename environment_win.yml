@@ -13,4 +13,6 @@ dependencies:
     - torch==2.5.1
     - torchinfo==1.8.0
     - torchvision==0.20.1
-    
+
+# 上記に加えてconda activate EQualificationExamModelStudy後に下記を実行する
+# pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu126
