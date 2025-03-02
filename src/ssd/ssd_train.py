@@ -86,6 +86,10 @@ class ResizeWithTarget:
 class ToTensorWithTarget:
     def __call__(self, image, target):
         image = F.to_tensor(image)
+        if isinstance(target, dict):
+            for key in ["boxes", "labels", "image_id", "area", "iscrowd"]:
+                if key in target and not torch.is_tensor(target[key]):
+                    target[key] = torch.tensor(target[key])
         return image, target
 
 
@@ -200,6 +204,7 @@ if __name__ == "__main__":
     num_epochs = 10
 
     device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
+    #device = torch.device("cpu")
     model.to(device)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
@@ -211,8 +216,8 @@ if __name__ == "__main__":
         # tqdmを使用してプログレスバーを表示
         for images, targets in tqdm(dataloader, desc=f"Epoch {epoch+1}/{num_epochs}"):
             # 画像とターゲットをGPUに移動
-            images = [image.to(device).contiguous() for image in images]  # 順序変更
-            targets = [{k: v.to(device).contiguous() for k, v in t.items()} for t in targets]  # 順序変更
+            images = images.to(device)
+            targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
             
             # 勾配をリセット
             optimizer.zero_grad()
