@@ -205,16 +205,17 @@ if __name__ == "__main__":
 
     device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
     #device = torch.device("cpu")
+    print(f"Device: {device}")
+
     model.to(device)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 
     for epoch in range(num_epochs):
-        # トレーニングモードを明示的に設定
         model.train()
         
-        # tqdmを使用してプログレスバーを表示
-        for images, targets in tqdm(dataloader, desc=f"Epoch {epoch+1}/{num_epochs}"):
+        pbar = tqdm(dataloader, desc=f"Epoch {epoch+1}/{num_epochs}")
+        for images, targets in pbar:
             # 画像とターゲットをGPUに移動
             images = images.to(device)
             targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
@@ -230,12 +231,17 @@ if __name__ == "__main__":
             losses.backward()
             optimizer.step()
 
-            # 個々の損失をログ出力
+            # 個々の損失を取得
             bbox_loss = loss_dict['bbox_regression'].item()
             cls_loss = loss_dict['classification'].item()
             total_loss = losses.item()
             
-            print(f"Epoch: {epoch+1}, Loss: {total_loss:.4f}, Bbox: {bbox_loss:.4f}, Cls: {cls_loss:.4f}")
-
+            # tqdmの進捗バーに表示を更新
+            pbar.set_postfix({
+                'Loss': f"{total_loss:.4f}",
+                'Bbox': f"{bbox_loss:.4f}",
+                'Cls': f"{cls_loss:.4f}"
+            })
+        
         # モデルの保存
         torch.save(model.state_dict(), f"ssd300_vgg16_epoch_{epoch+1}.pth")
