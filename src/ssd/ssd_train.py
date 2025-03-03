@@ -190,7 +190,7 @@ if __name__ == "__main__":
     )
 
     dataloader = DataLoader(
-        dataset=voc_dataset, batch_size=4, collate_fn=multiobject_collate_fn
+        dataset=voc_dataset, batch_size=8, collate_fn=multiobject_collate_fn
     )
 
     # DataLoaderからバッチを取得
@@ -201,7 +201,7 @@ if __name__ == "__main__":
     print("Batch Original Target:", targets[0])
     '''
 
-    num_epochs = 10
+    num_epochs = 70
 
     device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
     #device = torch.device("cpu")
@@ -210,6 +210,13 @@ if __name__ == "__main__":
     model.to(device)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+
+    # 学習率スケジューリングの実装例
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(
+        optimizer, 
+        milestones=[30, 50],  # これらのエポックで学習率を下げる
+        gamma=0.1  # 各マイルストーンで学習率を1/10に
+    )
 
     for epoch in range(num_epochs):
         model.train()
@@ -242,6 +249,9 @@ if __name__ == "__main__":
                 'Bbox': f"{bbox_loss:.4f}",
                 'Cls': f"{cls_loss:.4f}"
             })
+        
+        # 各エポック終了後
+        scheduler.step()
         
         # モデルの保存
         torch.save(model.state_dict(), f"ssd300_vgg16_epoch_{epoch+1}.pth")
