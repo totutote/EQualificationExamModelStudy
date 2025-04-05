@@ -1,3 +1,4 @@
+import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -10,7 +11,7 @@ import torchvision
 # Hyperparameters
 batch_size = 64
 learning_rate = 0.0002
-num_epochs = 5
+num_epochs = 50
 gn_input_dim = 100  # Dimension of the noise vector for the generator
 
 # Device configuration
@@ -43,6 +44,10 @@ discriminator.apply(utils.waight_init)
 criterion = nn.BCELoss()
 optimizer_ds = optim.Adam(discriminator.parameters(), lr=learning_rate, betas=(0.5, 0.999))
 optimizer_gn = optim.Adam(generator.parameters(), lr=learning_rate, betas=(0.5, 0.999))
+
+output_dir = './outputs/dcgan'
+if not os.path.exists(output_dir):
+    os.makedirs(output_dir)
 
 # Training loop
 for epoch in range(num_epochs):
@@ -84,7 +89,7 @@ for epoch in range(num_epochs):
 
         # Save the last fake image of the epoch
         if (i+1) % 100 == 0:
-            torchvision.utils.save_image(fake_image, f'fake_images_step_{epoch+1}_{i+1}.png')
+            torchvision.utils.save_image(fake_image, os.path.join(output_dir, f'fake_images_step_{epoch+1}_{i+1}.png'))
 
     print(f'Epoch [{epoch+1}/{num_epochs}], d_loss: {d_loss/len(train_loader):.4f}, g_loss: {g_loss/len(train_loader):.4f}')
 
