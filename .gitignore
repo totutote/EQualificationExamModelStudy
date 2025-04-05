@@ -176,3 +176,7 @@ dataset
 # Editor
 *.code-workspace
 .DS_Store
+
+# other
+sample/
+outputs/
