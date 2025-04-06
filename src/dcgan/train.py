@@ -29,16 +29,10 @@ transform = transforms.Compose([
 # CIFAR-10 dataset (コメントアウト)
 # train_dataset = datasets.CIFAR10(root='./dataset', train=True, download=True, transform=transform)
 # train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
-# 
-# val_dataset = datasets.CIFAR10(root='./dataset', train=False, download=True, transform=transform)
-# val_loader = DataLoader(dataset=val_dataset, batch_size=batch_size, shuffle=False)
 
 # Load Fashion-MNIST dataset
 train_dataset = datasets.FashionMNIST(root='./dataset', train=True, download=True, transform=transform)
 train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
-
-val_dataset = datasets.FashionMNIST(root='./dataset', train=False, download=True, transform=transform)
-val_loader = DataLoader(dataset=val_dataset, batch_size=batch_size, shuffle=False)
 
 # データセットからチャンネル数を自動取得
 sample_data, _ = next(iter(train_loader))
@@ -103,17 +97,18 @@ for epoch in range(num_epochs):
         fake_dsout_mean = discriminator_output.mean().item()
         optimizer_gn.step()
 
-        fake_image = generator(noisy_images)
-
-        # Save the last fake image of the epoch
-        if (i+1) % 100 == 0:
-            torchvision.utils.save_image(fake_image, os.path.join(output_dir, f'fake_images_step_{epoch+1}_{i+1}.png'))
-
     print(f'Epoch [{epoch+1}/{num_epochs}], \
           d_loss: {total_d_loss/len(train_loader):.4f}, \
           real_loss: {total_real_loss/len(train_loader):.4f}, \
           fake_loss: {total_fake_loss/len(train_loader):.4f}, \
           g_loss: {total_g_loss/len(train_loader):.4f}')
+
+    # Validation
+    generator.eval()
+    discriminator.eval()
+    noisy_images = torch.randn(real_images.size(0), gn_input_dim, 1, 1, device=device)
+    fake_image = generator(noisy_images)
+    torchvision.utils.save_image(fake_image, os.path.join(output_dir, f'fake_images_step_{epoch+1}.png'))
 
 # Save the trained model
 torch.save(generator.state_dict(), 'generator.pth')
