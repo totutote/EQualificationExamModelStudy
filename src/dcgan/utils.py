@@ -1,12 +1,13 @@
 import torch
 import torch.nn as nn
 
+# 定数定義
+DEFAULT_CHANNELS = 128  # デフォルトのチャネル数
+
 class Discriminator(nn.Module):
-    def __init__(self):
+    def __init__(self, img_ch, start_channels=DEFAULT_CHANNELS):
         super(Discriminator, self).__init__()
-        in_channels = 3
-        start_channels = 128
-        self.conv1 = nn.Conv2d(in_channels, out_channels=start_channels, kernel_size=4, stride=2, padding=1)
+        self.conv1 = nn.Conv2d(img_ch, out_channels=start_channels, kernel_size=4, stride=2, padding=1)
         self.leak1 = nn.LeakyReLU(0.2)
         self.conv2 = nn.Conv2d(start_channels, out_channels=start_channels*2, kernel_size=4, stride=2, padding=1)
         self.batchnorm2 = nn.BatchNorm2d(start_channels*2)
@@ -26,11 +27,8 @@ class Discriminator(nn.Module):
         return x
 
 class Generator(nn.Module):
-    def __init__(self):
+    def __init__(self, img_ch, input_dim, out_ch=DEFAULT_CHANNELS):
         super(Generator, self).__init__()
-        input_dim = 100
-        out_ch = 128
-        img_ch = 3
         self.conv1 = nn.ConvTranspose2d(input_dim, out_channels=out_ch * 4, kernel_size=3, stride=1, padding=0)
         self.batchnorm1 = nn.BatchNorm2d(out_ch * 4)
         self.lelu1 = nn.ReLU(0.2)

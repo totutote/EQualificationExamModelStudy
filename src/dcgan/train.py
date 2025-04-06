@@ -13,7 +13,7 @@ batch_size = 64
 ds_learning_rate = 0.00002
 gn_learning_rate = 0.0002
 num_epochs = 50
-gn_input_dim = 100  # Dimension of the noise vector for the generator
+gn_input_dim = 150  # Dimension of the noise vector for the generator
 
 # Device configuration
 device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
@@ -26,20 +26,31 @@ transform = transforms.Compose([
     ##transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
 ])
 
-# Load CIFAR-10 dataset
-train_dataset = datasets.CIFAR10(root='./dataset', train=True, download=True, transform=transform)
+# CIFAR-10 dataset (コメントアウト)
+# train_dataset = datasets.CIFAR10(root='./dataset', train=True, download=True, transform=transform)
+# train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
+# 
+# val_dataset = datasets.CIFAR10(root='./dataset', train=False, download=True, transform=transform)
+# val_loader = DataLoader(dataset=val_dataset, batch_size=batch_size, shuffle=False)
+
+# Load Fashion-MNIST dataset
+train_dataset = datasets.FashionMNIST(root='./dataset', train=True, download=True, transform=transform)
 train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 
-val_dataset = datasets.CIFAR10(root='./dataset', train=False, download=True, transform=transform)
+val_dataset = datasets.FashionMNIST(root='./dataset', train=False, download=True, transform=transform)
 val_loader = DataLoader(dataset=val_dataset, batch_size=batch_size, shuffle=False)
+
+# データセットからチャンネル数を自動取得
+sample_data, _ = next(iter(train_loader))
+in_channels = sample_data.shape[1]  # 通常は3（RGB）または1（グレースケール）
 
 # Initialize model, loss function, and optimizer
 # 生成器の初期化
-generator = utils.Generator().to(device)
+generator = utils.Generator(in_channels, input_dim=gn_input_dim).to(device)
 generator.apply(utils.waight_init)
 
 # 識別器の初期化
-discriminator = utils.Discriminator().to(device)
+discriminator = utils.Discriminator(in_channels).to(device)
 discriminator.apply(utils.waight_init)
 
 criterion = nn.BCELoss()
