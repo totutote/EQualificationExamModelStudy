@@ -6,7 +6,6 @@ class MultiHeadAttention(nn.Module):
     def __init__(self, embed_dim, num_heads):
         super(MultiHeadAttention, self).__init__()
         assert embed_dim % num_heads == 0, "埋め込み次元はヘッド数で割り切れる必要があります。"
-        self.embed_dim = embed_dim
         self.num_heads = num_heads
         self.head_dim = embed_dim // num_heads
 
