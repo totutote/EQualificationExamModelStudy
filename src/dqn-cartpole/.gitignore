@@ -1,0 +1,7 @@
+video/
+video_run/
+.DS_Store
+dqn_cartpole.pth
+training_progress.png
+requirements.txt
+src/__pycache__/model.cpython-310.pyc
